@@ -7,6 +7,7 @@ const TABS = [
   { to: '/outfits', label: 'Outfits' },
   { to: '/review', label: 'Review' },
   { to: '/stats', label: 'Stats' },
+  { to: '/settings', label: 'Settings' },
 ];
 
 export function NavShell(props: { children: ReactNode; onPickFiles: () => void }) {

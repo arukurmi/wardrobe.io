@@ -9,6 +9,7 @@ import { Wardrobe } from './views/Wardrobe';
 import { Outfits } from './views/Outfits';
 import { Review } from './views/Review';
 import { Stats } from './views/Stats';
+import { Settings } from './views/Settings';
 
 export default function App() {
   const queue = useMemo(createUploadQueue, []);
@@ -43,6 +44,7 @@ export default function App() {
           <Route path="/outfits" element={<Outfits />} />
           <Route path="/review" element={<Review />} />
           <Route path="/stats" element={<Stats />} />
+          <Route path="/settings" element={<Settings />} />
         </Routes>
       </NavShell>
       <DropZone onFiles={addFiles} />
