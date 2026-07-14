@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# User data — photos, crops, SQLite DB (never committed)
+data/
+
+# ML model cache
+.model-cache/
+
+# Environment
+.env
+.env.local
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.log
