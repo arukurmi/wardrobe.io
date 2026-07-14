@@ -5,6 +5,10 @@ import { DropZone } from './components/DropZone';
 import { ProgressTray } from './components/ProgressTray';
 import { createUploadQueue } from './upload/wire';
 import type { QueueItem } from './upload/queue';
+import { Wardrobe } from './views/Wardrobe';
+import { Outfits } from './views/Outfits';
+import { Review } from './views/Review';
+import { Stats } from './views/Stats';
 
 export default function App() {
   const queue = useMemo(createUploadQueue, []);
@@ -35,10 +39,10 @@ export default function App() {
       />
       <NavShell onPickFiles={() => fileInput.current?.click()}>
         <Routes>
-          <Route path="/" element={<h1>Wardrobe</h1>} />
-          <Route path="/outfits" element={<h1>Outfits</h1>} />
-          <Route path="/review" element={<h1>Review</h1>} />
-          <Route path="/stats" element={<h1>Stats</h1>} />
+          <Route path="/" element={<Wardrobe />} />
+          <Route path="/outfits" element={<Outfits />} />
+          <Route path="/review" element={<Review />} />
+          <Route path="/stats" element={<Stats />} />
         </Routes>
       </NavShell>
       <DropZone onFiles={addFiles} />
