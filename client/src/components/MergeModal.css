@@ -1,0 +1,64 @@
+.mm-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: var(--bg-overlay);
+  backdrop-filter: blur(6px);
+  display: grid;
+  place-items: center;
+}
+
+.mm-box {
+  background: var(--bg-raised);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: 2rem 2.25rem;
+  max-width: 460px;
+  box-shadow: var(--shadow-lift);
+}
+
+.mm-pair {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.25rem 0;
+  justify-content: center;
+}
+
+.mm-pair figure {
+  margin: 0;
+  text-align: center;
+}
+
+.mm-pair img,
+.mm-empty {
+  width: 110px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: #17161a;
+}
+
+.mm-pair figcaption {
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--ink-dim);
+}
+
+.mm-arrow {
+  color: var(--accent);
+  font-size: 1.5rem;
+}
+
+.mm-box p {
+  color: var(--ink-dim);
+  font-size: 0.9rem;
+}
+
+.mm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+}
