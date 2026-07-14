@@ -1,0 +1,65 @@
+.tray {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  width: 280px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lift);
+  padding: 0.9rem 1rem;
+  z-index: 60;
+  font-size: 0.85rem;
+}
+
+.tray header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.tray-count {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.tray-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.3rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.tray-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink-dim);
+}
+
+.tray-status {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.tray-item.processing .tray-status {
+  color: var(--accent);
+}
+
+.tray-item.error .tray-status {
+  color: var(--danger);
+}
+
+.tray-item.error button {
+  padding: 0.1rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+.tray-more {
+  color: var(--ink-faint);
+  padding-top: 0.4rem;
+  text-align: center;
+}
