@@ -20,6 +20,38 @@
 Out of scope for v1: accounts, cloud anything, mobile app, social features,
 automatic price/valuation, outfit recommendations.
 
+## v1.5 — garment reconstruction & styling (next up)
+
+Benchmark: [aesty.ai](https://www.aesty.ai/) — digital closet with auto
+organization, AI stylist, virtual try-on avatar, color analysis, weekly
+outfit planner, mix & match from your own closet, screenshot-to-outfit,
+and shop-the-gaps.
+
+Priority order for us:
+
+1. **Garment reconstruction (flagship)** — stop showing raw segmentation
+   crops as garment cards. For each detected piece, reconstruct a clean
+   standalone catalog image (transparent RGBA PNG, front view, no body,
+   no underlayers, no background) via an image-generation model prompted
+   with the source crop as evidence. Workflow is codified in the
+   `extract-clothing-cutouts` skill (`.claude/skills/`). Garment cards and
+   dedupe review then show the cutout; the original photo stays linked.
+2. **Detection quality** — reject low-information crops before they become
+   pieces (near-solid-color patches, tiny fragments, duplicate stacked
+   crops from the same region). These currently pollute the wardrobe grid.
+3. **Outfit ideas / mix & match** — generate outfit combinations from the
+   user's own closet (category + color rules first, embedding similarity
+   later; no shopping).
+4. **Weekly planner** — assign outfits to days, mark as worn (feeds the
+   existing wear-count stats).
+5. **Color analysis** — dominant-palette extraction per garment (already
+   have crops), personal palette suggestions later.
+6. **Screenshot-to-outfit** — match an inspiration screenshot against the
+   closet by embedding similarity, list closest owned pieces per slot.
+
+Deferred from aesty parity: virtual try-on avatar, shopping integration —
+both need cloud services and conflict with the local-first v1 story.
+
 ## v2+ — productization (for a future session to pick up)
 
 Goal: turn this into a hosted multi-user product.
