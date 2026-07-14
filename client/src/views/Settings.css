@@ -1,0 +1,65 @@
+.settings h2 {
+  margin-top: 2rem;
+  font-size: 1.2rem;
+}
+
+.settings .dim {
+  color: var(--ink-dim);
+  font-size: 0.9rem;
+}
+
+.settings .small {
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+}
+
+.sliders {
+  display: grid;
+  gap: 1.5rem;
+  max-width: 460px;
+  margin-top: 1rem;
+}
+
+.sliders label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+}
+
+.sliders strong {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.sliders input[type='range'] {
+  accent-color: var(--accent);
+  padding: 0;
+}
+
+.slider-hint {
+  color: var(--ink-faint);
+  font-size: 0.78rem;
+}
+
+.backup-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 0.75rem;
+}
+
+.button-link {
+  display: inline-block;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-raised);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.95rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.15s var(--ease);
+}
+
+.button-link:hover {
+  border-color: var(--accent);
+}
