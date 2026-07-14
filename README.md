@@ -14,6 +14,7 @@ jean, and jacket you own — deduplicated into one beautiful, searchable wardrob
 ![Transformers.js](https://img.shields.io/badge/🤗_Transformers.js-in--browser_ML-ffd21e)
 ![Tests](https://img.shields.io/badge/tests-61_passing-6fbf7e)
 ![Privacy](https://img.shields.io/badge/photos-never_leave_your_machine-e8a33d)
+![License](https://img.shields.io/badge/license-MIT-8a8a8a)
 
 *demo video coming soon — drag-drop flood → wardrobe → drag-to-merge → stats*
 
@@ -32,6 +33,7 @@ jean, and jacket you own — deduplicated into one beautiful, searchable wardrob
 | 👗 **Outfits view** | Original photos with piece chips — tap a chip, jump to the garment. |
 | 📊 **Stats that screenshot well** | Most-worn, category breakdown, total wardrobe value, cost-per-wear. |
 | 💾 **One-file backup** | Export the entire wardrobe (images + data) as a single zip. |
+| 🎛 **Tunable matching** | Similarity thresholds live in Settings — make dedupe stricter or looser to taste. |
 
 ## 🏗 How it works
 
