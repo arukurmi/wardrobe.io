@@ -1,0 +1,38 @@
+.dropzone-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: var(--bg-overlay);
+  backdrop-filter: blur(6px);
+  animation: dz-in 0.18s var(--ease);
+}
+
+.dropzone-box {
+  border: 2px dashed var(--accent);
+  border-radius: var(--radius-lg);
+  padding: 3.5rem 5rem;
+  text-align: center;
+  background: var(--bg-raised);
+  box-shadow: var(--shadow-lift);
+}
+
+.dropzone-box h2 {
+  font-size: 2rem;
+  color: var(--accent);
+}
+
+.dropzone-box p {
+  color: var(--ink-dim);
+  margin: 0.5rem 0 0;
+}
+
+@keyframes dz-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
