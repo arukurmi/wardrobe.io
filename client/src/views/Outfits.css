@@ -1,0 +1,69 @@
+.outfits-grid {
+  margin-top: 1.5rem;
+  columns: 4 220px;
+  column-gap: 1.1rem;
+}
+
+.outfit {
+  margin: 0 0 1.1rem;
+  break-inside: avoid;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.outfit img {
+  width: 100%;
+  display: block;
+}
+
+.outfit figcaption {
+  padding: 0.6rem 0.7rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 0.5rem;
+}
+
+.outfit-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.chip {
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.72rem;
+  background: var(--accent-dim);
+  border: none;
+  color: var(--accent);
+}
+
+.chip:hover {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.chip.none {
+  background: none;
+  border: 1px dashed var(--border-strong);
+  color: var(--ink-faint);
+}
+
+.outfit-delete {
+  font-size: 0.7rem;
+  padding: 0.15rem 0.5rem;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.outfit:hover .outfit-delete {
+  opacity: 1;
+}
+
+.outfits-empty {
+  color: var(--ink-dim);
+  padding: 3rem 0;
+}
