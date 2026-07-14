@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react';
 import type { QueueItem } from '../upload/queue';
+import { trayState } from '../upload/tray-state';
 import './ProgressTray.css';
 
 const STATUS_LABEL: Record<QueueItem['status'], string> = {
@@ -9,21 +11,38 @@ const STATUS_LABEL: Record<QueueItem['status'], string> = {
   error: 'failed',
 };
 
+const DISMISS_AFTER_MS = 2000;
+
 export function ProgressTray(props: {
   items: QueueItem[];
   onRetry: (id: string) => void;
 }) {
+  const state = trayState(props.items);
+  const [dismissed, setDismissed] = useState(false);
+
+  useEffect(() => {
+    if (state !== 'settled') {
+      setDismissed(false);
+      return;
+    }
+    const t = setTimeout(() => setDismissed(true), DISMISS_AFTER_MS);
+    return () => clearTimeout(t);
+  }, [state, props.items]);
+
+  if (state === 'hidden' || dismissed) return null;
+
   const visible = props.items.filter((i) => i.status !== 'done');
   const doneCount = props.items.length - visible.length;
-  if (props.items.length === 0) return null;
+
   return (
-    <aside className="tray">
+    <aside className={`tray${state === 'settled' ? ' settled' : ''}`}>
       <header>
         <strong>Uploads</strong>
         <span className="tray-count">
           {doneCount}/{props.items.length}
         </span>
       </header>
+      {state === 'settled' && <div className="tray-done">all photos saved ✓</div>}
       {visible.slice(0, 8).map((item) => (
         <div key={item.id} className={`tray-item ${item.status}`}>
           <span className="tray-name" title={item.fileName}>

@@ -58,6 +58,27 @@
   font-size: 0.75rem;
 }
 
+.tray.settled {
+  animation: tray-fade 2s ease forwards;
+}
+
+@keyframes tray-fade {
+  0%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+.tray-done {
+  color: var(--accent);
+  padding-top: 0.4rem;
+  border-top: 1px solid var(--border);
+}
+
 .tray-more {
   color: var(--ink-faint);
   padding-top: 0.4rem;
