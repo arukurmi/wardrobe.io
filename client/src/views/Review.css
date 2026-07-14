@@ -1,0 +1,145 @@
+.review-h {
+  margin-top: 2.25rem;
+  font-size: 1.25rem;
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.badge {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.1rem 0.55rem;
+  font-family: var(--font-ui);
+}
+
+.dim {
+  color: var(--ink-faint);
+  font-size: 0.9rem;
+}
+
+.sugg-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.sugg {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+}
+
+.sugg-pair {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.sugg-pair figure {
+  margin: 0;
+  text-align: center;
+}
+
+.sugg-pair img,
+.sugg-empty {
+  width: 96px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: #17161a;
+}
+
+.sugg-pair figcaption {
+  font-size: 0.75rem;
+  color: var(--ink-dim);
+  margin-top: 0.3rem;
+  max-width: 96px;
+}
+
+.sugg-sim {
+  text-align: center;
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+}
+
+.sugg-sim span {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  color: var(--ink-faint);
+}
+
+.sugg-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 0.9rem;
+}
+
+.undetected-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.undetected-grid figure {
+  margin: 0;
+  position: relative;
+}
+
+.undetected-grid img {
+  width: 100%;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.undetected-grid button {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  font-size: 0.7rem;
+  padding: 0.15rem 0.5rem;
+}
+
+.pieces-table {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 0.6rem;
+}
+
+.piece-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem;
+}
+
+.piece-row img {
+  width: 44px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.piece-row select {
+  flex: 1;
+}
+
+.piece-row button {
+  font-size: 0.72rem;
+  padding: 0.2rem 0.5rem;
+}
