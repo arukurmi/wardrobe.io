@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import request from 'supertest';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -135,6 +135,34 @@ describe('api', () => {
     expect(garments[0].wearCount).toBe(1);
     expect(garments[0].coverUrl).toMatch(/^\/data\/pieces\//); // re-pointed, not dangling
     expect((await request(app).get('/api/photos')).body.length).toBe(1);
+  });
+
+  it('deletes photo without throwing when a stored filename is unsafe, and warns', async () => {
+    const r = await uploadPhoto([{ category: 'top', emb: emb([1]) }]);
+    const photoId = r.body.photoId;
+    const pieceId = r.body.pieces[0].pieceId;
+    // Simulate a corrupted/imported bad filename that could never be produced today.
+    db.prepare('update photos set filename = ? where id = ?').run('../evil.png', photoId);
+    db.prepare('update pieces set crop_filename = ? where id = ?').run('a/b.webp', pieceId);
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const del = await request(app).delete(`/api/photos/${photoId}`);
+    expect(del.status).toBe(200);
+    expect(del.body).toEqual({ ok: true });
+    expect(warn).toHaveBeenCalledTimes(2); // photo + its one piece both skipped
+    warn.mockRestore();
+    expect((await request(app).get('/api/photos')).body.length).toBe(0);
+  });
+
+  it('deletes piece without throwing when its crop filename is unsafe, and warns', async () => {
+    const r = await uploadPhoto([{ category: 'top', emb: emb([1]) }]);
+    const pieceId = r.body.pieces[0].pieceId;
+    db.prepare('update pieces set crop_filename = ? where id = ?').run('../../etc/x.webp', pieceId);
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const del = await request(app).delete(`/api/pieces/${pieceId}`);
+    expect(del.status).toBe(200);
+    expect(del.body).toEqual({ ok: true });
+    expect(warn).toHaveBeenCalledOnce();
+    warn.mockRestore();
   });
 
   it('stats endpoint shape', async () => {

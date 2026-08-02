@@ -136,9 +136,17 @@ export function photosRouter(db: Db, dataDir: string): Router {
     })();
     if (isSafeName(ph.filename))
       fs.rmSync(safeJoin(dataDir, 'photos', ph.filename), { force: true });
+    else
+      console.warn(
+        `skipped unlink of photo ${ph.id}: unsafe stored filename ${JSON.stringify(ph.filename)}`
+      );
     for (const p of pieces)
       if (isSafeName(p.crop_filename))
         fs.rmSync(safeJoin(dataDir, 'pieces', p.crop_filename), { force: true });
+      else
+        console.warn(
+          `skipped unlink of crop for piece ${p.id}: unsafe stored filename ${JSON.stringify(p.crop_filename)}`
+        );
     res.json({ ok: true });
   });
 

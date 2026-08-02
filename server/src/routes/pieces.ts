@@ -42,6 +42,10 @@ export function piecesRouter(db: Db, dataDir: string): Router {
     })();
     if (isSafeName(piece.crop_filename))
       fs.rmSync(safeJoin(dataDir, 'pieces', piece.crop_filename), { force: true });
+    else
+      console.warn(
+        `skipped unlink of crop for piece ${piece.id}: unsafe stored filename ${JSON.stringify(piece.crop_filename)}`
+      );
     res.json({ ok: true });
   });
 
