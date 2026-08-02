@@ -68,6 +68,7 @@ export async function importAll(
   if (!dumpEntry) throw new Error('dump.json missing from archive');
   const dump = JSON.parse((await dumpEntry.buffer()).toString('utf8'));
 
+  const base = path.resolve(dataDir);
   let entryCount = 0;
   let totalBytes = 0;
   for (const f of zip.files) {
@@ -76,11 +77,15 @@ export async function importAll(
     if (++entryCount > maxEntries) {
       throw new Error(`archive has too many entries (> ${maxEntries}); refusing to extract`);
     }
+    // Reject absolute paths outright; they can never live under dataDir.
+    if (path.isAbsolute(f.path)) continue;
     // only restore into the two known image dirs; ignore anything else
     const rel = path.normalize(f.path);
     if (!(rel.startsWith('photos/') || rel.startsWith('pieces/'))) continue;
-    if (rel.includes('..')) continue;
-    const dest = path.join(dataDir, rel);
+    // Robust containment: resolve the destination and require it to sit
+    // inside dataDir, defeating traversal like `photos/../../escape`.
+    const dest = path.resolve(dataDir, rel);
+    if (!(dest === base || dest.startsWith(base + path.sep))) continue;
     const buf = await f.buffer();
     // Zip-bomb defense: cap total uncompressed bytes written to disk.
     totalBytes += buf.length;
