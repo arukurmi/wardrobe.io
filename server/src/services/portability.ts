@@ -23,6 +23,22 @@ export interface ImportLimits {
   maxTotalBytes?: number;
 }
 
+/**
+ * Per-table set of legal column names, read from the live DB schema.
+ * The import builds SQL identifiers from untrusted dump.json keys, so every
+ * key must be checked against this allowlist before it reaches a statement.
+ */
+function columnAllowlist(db: Db): Record<string, Set<string>> {
+  const map: Record<string, Set<string>> = {};
+  for (const t of TABLES) {
+    const cols = (db.prepare(`pragma table_info(${t})`).all() as any[]).map(
+      (c) => c.name as string
+    );
+    map[t] = new Set(cols);
+  }
+  return map;
+}
+
 /** Zip of every image file + a JSON dump of all tables (embeddings base64). */
 export function exportAll(db: Db, dataDir: string, out: Writable): Promise<void> {
   const dump: Record<string, unknown[]> = {};
@@ -98,10 +114,13 @@ export async function importAll(
     fs.writeFileSync(dest, buf);
   }
 
+  const allow = columnAllowlist(db);
+
   db.transaction(() => {
     db.prepare('delete from settings').run();
     for (const t of TABLES) {
       const rows = (dump[t] ?? []) as any[];
+      const allowed = allow[t];
       for (const row of rows) {
         const copy = { ...row };
         if (copy.__embedding_b64) {
@@ -109,6 +128,14 @@ export async function importAll(
           delete copy.__embedding_b64;
         }
         const keys = Object.keys(copy);
+        // The keys become SQL identifiers below; reject anything not a real
+        // column of this table so a crafted dump cannot inject identifiers.
+        for (const k of keys) {
+          if (!allowed.has(k)) {
+            throw new Error(`dump.json: unexpected column "${k}" for table "${t}"`);
+          }
+        }
+        if (keys.length === 0) continue;
         db.prepare(
           `insert into ${t} (${keys.join(',')}) values (${keys.map((k) => `@${k}`).join(',')})`
         ).run(copy);
