@@ -59,6 +59,7 @@ export async function importAll(
   limits: ImportLimits = {}
 ): Promise<void> {
   const maxEntries = limits.maxEntries ?? MAX_ENTRIES;
+  const maxTotalBytes = limits.maxTotalBytes ?? MAX_TOTAL_BYTES;
   const existing = (db.prepare('select count(*) as n from photos').get() as any).n;
   if (existing > 0) throw new Error('import requires an empty database');
 
@@ -68,6 +69,7 @@ export async function importAll(
   const dump = JSON.parse((await dumpEntry.buffer()).toString('utf8'));
 
   let entryCount = 0;
+  let totalBytes = 0;
   for (const f of zip.files) {
     if (f.type !== 'File') continue;
     // Zip-bomb defense: refuse archives with an implausible number of entries.
@@ -79,8 +81,16 @@ export async function importAll(
     if (!(rel.startsWith('photos/') || rel.startsWith('pieces/'))) continue;
     if (rel.includes('..')) continue;
     const dest = path.join(dataDir, rel);
+    const buf = await f.buffer();
+    // Zip-bomb defense: cap total uncompressed bytes written to disk.
+    totalBytes += buf.length;
+    if (totalBytes > maxTotalBytes) {
+      throw new Error(
+        `archive expands to more than ${maxTotalBytes} bytes; refusing to extract`
+      );
+    }
     fs.mkdirSync(path.dirname(dest), { recursive: true });
-    fs.writeFileSync(dest, await f.buffer());
+    fs.writeFileSync(dest, buf);
   }
 
   db.transaction(() => {
