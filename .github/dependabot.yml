@@ -1,0 +1,32 @@
+version: 2
+
+# Weekly npm dependency updates for both packages.
+#
+# Note: a few majors are intentionally held back for Node 20.12 compatibility
+# per CLAUDE.md — vitest v3, vite v6, and archiver v7. If Dependabot proposes
+# bumping any of these to a new major, that PR should be closed until the Node
+# version on the dev machine is upgraded.
+updates:
+  - package-ecosystem: "npm"
+    directory: "/server"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    ignore:
+      # Held per CLAUDE.md (Node 20.12).
+      - dependency-name: "vitest"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "archiver"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: "npm"
+    directory: "/client"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    ignore:
+      # Held per CLAUDE.md (Node 20.12).
+      - dependency-name: "vitest"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "vite"
+        update-types: ["version-update:semver-major"]
