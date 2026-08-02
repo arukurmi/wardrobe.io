@@ -21,8 +21,11 @@ export function settingsRouter(db: Db): Router {
   router.put('/', (req, res) => {
     const body = z
       .object({
-        attach: z.number().min(0.5).max(1),
-        suggest: z.number().min(0.3).max(1),
+        // thresholds are probabilities in [0,1]; the tighter floors keep
+        // attach/suggest in their useful ranges. `.finite()` rejects
+        // NaN/±Infinity so only real numbers reach the settings table.
+        attach: z.number().finite().min(0.5).max(1),
+        suggest: z.number().finite().min(0.3).max(1),
       })
       .partial()
       .strict()
