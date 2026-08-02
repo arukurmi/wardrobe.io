@@ -39,8 +39,18 @@ export type IngestResult = {
 };
 
 function ext(name: string): string {
-  const e = path.extname(name).toLowerCase();
+  // Derive the extension from the basename only, so a name carrying path
+  // separators can never leak into the generated filename.
+  const e = path.extname(path.basename(name)).toLowerCase();
   return ['.jpg', '.jpeg', '.png', '.webp'].includes(e) ? e : '.jpg';
+}
+
+/** A generated filename must be a plain basename that stays inside its dir. */
+function assertSafeFilename(dir: string, filename: string): void {
+  const resolved = path.resolve(dir, filename);
+  if (path.dirname(resolved) !== path.resolve(dir)) {
+    throw new Error(`unsafe filename: ${filename}`);
+  }
 }
 
 /**
@@ -56,6 +66,7 @@ export function ingestPhoto(db: Db, dataDir: string, input: IngestInput): Ingest
 
   const photoId = newId();
   const photoFilename = `${photoId}${ext(input.originalName)}`;
+  assertSafeFilename(photosDir, photoFilename);
   const movedFiles: string[] = [];
 
   const photoDest = path.join(photosDir, photoFilename);
