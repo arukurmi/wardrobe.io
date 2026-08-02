@@ -45,7 +45,11 @@ function ext(name: string): string {
   return ['.jpg', '.jpeg', '.png', '.webp'].includes(e) ? e : '.jpg';
 }
 
-/** A generated filename must be a plain basename that stays inside its dir. */
+/**
+ * Precautionary check that a generated filename is a plain basename inside its
+ * dir. The on-disk name is always `nanoid(12)` + an allow-listed extension, so
+ * this cannot trip today; it guards against future changes to that scheme.
+ */
 function assertSafeFilename(dir: string, filename: string): void {
   const resolved = path.resolve(dir, filename);
   if (path.dirname(resolved) !== path.resolve(dir)) {

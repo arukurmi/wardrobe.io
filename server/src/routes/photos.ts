@@ -101,7 +101,8 @@ export function photosRouter(db: Db, dataDir: string): Router {
   ]);
 
   // Translate multer limit errors and mimetype rejections into descriptive
-  // 400s, cleaning up any tmp files multer already wrote before aborting.
+  // 400s. multer 2.x already removes its own tmp files before calling back on
+  // error; the extra sweep here is a precautionary catch-all.
   const handleUpload = (req: Request, res: Response, next: NextFunction) => {
     uploadFields(req, res, (err: unknown) => {
       if (!err) return next();
