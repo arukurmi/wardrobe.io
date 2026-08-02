@@ -21,7 +21,10 @@ app.use(
     dotfiles: 'ignore',
     fallthrough: false,
     setHeaders: (res) => {
-      // defense-in-depth: never let the browser MIME-sniff user-supplied files
+      // Redundant with the global securityHeaders() middleware (which already
+      // sets this on every response); kept here as a belt-and-suspenders
+      // guarantee so served user files stay non-sniffable even if the static
+      // mount is ever relocated ahead of that middleware.
       res.setHeader('X-Content-Type-Options', 'nosniff');
     },
   })
