@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import fs from 'node:fs';
-import path from 'node:path';
 import { z } from 'zod';
 import type { Db } from '../db.js';
 import { CATEGORIES } from '../db.js';
 import { getPiece, updatePiece, deletePiece, piecesForGarment } from '../repo/pieces.js';
 import { getGarment, updateGarment } from '../repo/garments.js';
 import { pieceDto } from './photos.js';
+import { isSafeName, safeJoin } from '../lib/safepath.js';
 
 const patchSchema = z
   .object({
@@ -40,7 +40,8 @@ export function piecesRouter(db: Db, dataDir: string): Router {
       }
       deletePiece(db, piece.id);
     })();
-    fs.rmSync(path.join(dataDir, 'pieces', piece.crop_filename), { force: true });
+    if (isSafeName(piece.crop_filename))
+      fs.rmSync(safeJoin(dataDir, 'pieces', piece.crop_filename), { force: true });
     res.json({ ok: true });
   });
 
