@@ -7,10 +7,14 @@ import { piecesRouter } from './routes/pieces.js';
 import { suggestionsRouter } from './routes/suggestions.js';
 import { statsRouter, settingsRouter, ioRouter } from './routes/misc.js';
 import { MergeError } from './services/merge.js';
+import { authGate } from './middleware/authGate.js';
 
 export function createApp(db: Db, dataDir: string): Express {
   const app = express();
   app.use(express.json({ limit: '1mb' }));
+
+  // Optional bearer-token gate (off unless WARDROBE_TOKEN is set); health stays open.
+  app.use('/api', authGate());
 
   app.get('/api/health', (_req, res) => res.json({ ok: true }));
   app.use('/api/photos', photosRouter(db, dataDir));
