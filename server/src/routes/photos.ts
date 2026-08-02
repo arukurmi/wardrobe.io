@@ -52,6 +52,20 @@ function rmTmpFiles(files: Express.Multer.File[]): void {
   for (const f of files) fs.rmSync(f.path, { force: true });
 }
 
+/**
+ * `originalname` is fully user-controlled. Strip path separators and control
+ * chars and cap the length before it reaches ingest, so it can only ever be
+ * used as a plain label / extension source — never as a path component.
+ */
+function sanitizeOriginalName(name: string): string {
+  const cleaned = name
+    .replace(/[/\\]/g, '_')
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\x00-\x1f\x7f]/g, '')
+    .slice(0, 255);
+  return cleaned || 'upload';
+}
+
 function decodeEmbedding(b64: string): Float32Array {
   const buf = Buffer.from(b64, 'base64');
   if (buf.byteLength !== EMBEDDING_DIM * 4) {
@@ -140,7 +154,7 @@ export function photosRouter(db: Db, dataDir: string): Router {
         }));
         const result = ingestPhoto(db, dataDir, {
           originalPath: original.path,
-          originalName: original.originalname,
+          originalName: sanitizeOriginalName(original.originalname),
           pieces,
         });
         res.status(201).json(result);
