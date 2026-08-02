@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, type Request } from 'express';
 import multer from 'multer';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -28,6 +28,17 @@ const metaSchema = z.object({
     )
     .max(24),
 });
+
+/** Every tmp file multer wrote for this request, across all fields. */
+function uploadedFiles(req: Request): Express.Multer.File[] {
+  const files = req.files as Record<string, Express.Multer.File[]> | undefined;
+  return files ? Object.values(files).flat() : [];
+}
+
+/** Best-effort removal of tmp files; safe to call on any error path. */
+function rmTmpFiles(files: Express.Multer.File[]): void {
+  for (const f of files) fs.rmSync(f.path, { force: true });
+}
 
 function decodeEmbedding(b64: string): Float32Array {
   const buf = Buffer.from(b64, 'base64');
@@ -68,11 +79,7 @@ export function photosRouter(db: Db, dataDir: string): Router {
       const files = req.files as Record<string, Express.Multer.File[]> | undefined;
       const original = files?.original?.[0];
       const crops = files?.crops ?? [];
-      const cleanup = () => {
-        for (const f of [original, ...crops]) {
-          if (f) fs.rmSync(f.path, { force: true });
-        }
-      };
+      const cleanup = () => rmTmpFiles(uploadedFiles(req));
       try {
         if (!original) {
           cleanup();
