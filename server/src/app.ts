@@ -26,6 +26,14 @@ export function createApp(db: Db, dataDir: string): Express {
   app.use('/api/settings', settingsRouter(db));
   app.use('/api/io', ioRouter(db, dataDir));
 
+  // User images (crops + originals). Gated by the same opt-in token as /api,
+  // so enabling WARDROBE_TOKEN protects the photos too — not just metadata.
+  app.use(
+    '/data',
+    authGate(),
+    express.static(dataDir, { index: false, dotfiles: 'ignore', fallthrough: false })
+  );
+
   app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
     if (err instanceof ZodError) {
       return res.status(400).json({
