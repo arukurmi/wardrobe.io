@@ -44,7 +44,13 @@ export function rateLimit(opts: RateLimitOptions): RequestHandler {
       lastPrune = current;
     }
 
-    const key = req.ip ?? 'unknown';
+    // Fall back to per-connection identifiers so a single unidentifiable client
+    // can't share (and exhaust) one global bucket for everyone.
+    const key =
+      req.ip ??
+      req.socket?.remoteAddress ??
+      req.socket?.remotePort?.toString() ??
+      'unknown';
     let bucket = buckets.get(key);
     if (!bucket || bucket.resetAt <= current) {
       bucket = { count: 0, resetAt: current + windowMs };
