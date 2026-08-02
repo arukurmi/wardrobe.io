@@ -16,7 +16,15 @@ const app = createApp(db, dataDir);
 // user images (crops + originals)
 app.use(
   '/data',
-  express.static(dataDir, { index: false, dotfiles: 'ignore', fallthrough: false })
+  express.static(dataDir, {
+    index: false,
+    dotfiles: 'ignore',
+    fallthrough: false,
+    setHeaders: (res) => {
+      // defense-in-depth: never let the browser MIME-sniff user-supplied files
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+    },
+  })
 );
 
 // built client, with SPA fallback
