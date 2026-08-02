@@ -20,13 +20,26 @@ export function createApp(db: Db, dataDir: string): Express {
     next();
   });
 
+  // Bound abusive/runaway clients (defense-in-depth for this localhost app).
+  // Placed before body parsing so a 429 is returned without first buffering a
+  // (potentially 1MB) JSON body.
+  app.use('/api', rateLimit({ windowMs: 60_000, max: 300 }));
+
   // Cap runaway handlers so a stuck request can't hold a connection forever.
-  app.use(timeout(30_000));
+  // Explicitly skip streaming / large-payload routes (zip export, multi-GB
+  // import, and photo uploads) plus the /data static mount: those can legitimately
+  // run past a fixed deadline, and killing the response mid-stream would leave the
+  // handler writing to an ended stream.
+  const requestTimeout = timeout(30_000);
+  const TIMEOUT_SKIP_PREFIXES = ['/api/io', '/api/photos', '/data'];
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    const skip = TIMEOUT_SKIP_PREFIXES.some(
+      (p) => req.path === p || req.path.startsWith(p + '/')
+    );
+    return skip ? next() : requestTimeout(req, res, next);
+  });
 
   app.use(express.json({ limit: '1mb' }));
-
-  // Bound abusive/runaway clients (defense-in-depth for this localhost app).
-  app.use('/api', rateLimit({ windowMs: 60_000, max: 300 }));
 
   app.get('/api/health', (_req, res) => res.json({ ok: true }));
   app.use('/api/photos', photosRouter(db, dataDir));
