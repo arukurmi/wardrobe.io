@@ -7,9 +7,12 @@ import { piecesRouter } from './routes/pieces.js';
 import { suggestionsRouter } from './routes/suggestions.js';
 import { statsRouter, settingsRouter, ioRouter } from './routes/misc.js';
 import { MergeError } from './services/merge.js';
+import { securityHeaders } from './middleware/securityHeaders.js';
 
 export function createApp(db: Db, dataDir: string): Express {
   const app = express();
+  app.disable('x-powered-by');
+  app.use(securityHeaders());
   app.use(express.json({ limit: '1mb' }));
 
   app.get('/api/health', (_req, res) => res.json({ ok: true }));
