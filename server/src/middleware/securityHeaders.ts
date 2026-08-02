@@ -5,10 +5,15 @@ import type { Request, Response, NextFunction, RequestHandler } from 'express';
  *
  * The React client uses @huggingface/transformers, which runs models entirely
  * in the browser. That requires a handful of otherwise-unusual allowances:
- *   - script-src 'wasm-unsafe-eval' — transformers.js compiles WASM (ONNX runtime).
+ *   - script-src 'wasm-unsafe-eval' blob: — transformers.js compiles WASM (ONNX
+ *     runtime), and onnxruntime-web rewrites its WASM factory to a blob: URL that
+ *     it loads via dynamic import(); that import is governed by script-src (not
+ *     worker-src), so blob: must be allowed here or the model load is CSP-blocked.
  *   - worker-src blob: — the ML pipeline spawns web workers from blob: URLs.
  *   - connect-src https: data: blob: — model weights are fetched over https and
- *     materialized as data:/blob: URLs before decoding.
+ *     materialized as data:/blob: URLs before decoding. The https: wildcard is a
+ *     deliberate tradeoff: HF/CDN model hosts are not known ahead of time and can
+ *     change, so we cannot pin an exact origin here.
  *   - img-src data: blob: — crops/previews are rendered from client-side blobs.
  *   - style-src 'unsafe-inline' — Vite/React inject inline styles.
  * Everything else is locked to 'self'; object-src is fully disabled and the page
@@ -18,7 +23,7 @@ import type { Request, Response, NextFunction, RequestHandler } from 'express';
  */
 const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
-  "script-src 'self' 'wasm-unsafe-eval'",
+  "script-src 'self' 'wasm-unsafe-eval' blob:",
   "worker-src 'self' blob:",
   "connect-src 'self' https: data: blob:",
   "img-src 'self' data: blob:",

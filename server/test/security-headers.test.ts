@@ -34,7 +34,7 @@ describe('security headers', () => {
     const res = await request(app).get('/api/health');
     const csp = res.headers['content-security-policy'];
     expect(csp).toContain("default-src 'self'");
-    expect(csp).toContain("script-src 'self' 'wasm-unsafe-eval'");
+    expect(csp).toContain("script-src 'self' 'wasm-unsafe-eval' blob:");
     expect(csp).toContain("worker-src 'self' blob:");
     expect(csp).toContain("connect-src 'self' https: data: blob:");
     expect(csp).toContain("object-src 'none'");
