@@ -65,6 +65,28 @@ describe('import zip-safety', () => {
     ).rejects.toThrow(/bytes/);
   });
 
+  it('rejects a high-ratio entry by declared size before decompressing', async () => {
+    const zipPath = path.join(tmp, 'bomb.zip');
+    const dataDir = path.join(tmp, 'dbomb');
+    // 8 MiB of a single repeated byte compresses to a few KB, but its declared
+    // uncompressedSize must trip the cap without ever being buffered.
+    await makeZip(zipPath, {}, [['photos/bomb.jpg', 'A'.repeat(8 * 1024 * 1024)]]);
+    await expect(
+      importAll(openDb(':memory:'), dataDir, zipPath, { maxTotalBytes: 1024 })
+    ).rejects.toThrow(/expands to more than/);
+    // nothing was written to disk before the check tripped
+    expect(fs.existsSync(path.join(dataDir, 'photos', 'bomb.jpg'))).toBe(false);
+  });
+
+  it('rejects a dump.json larger than the byte cap before buffering', async () => {
+    const zipPath = path.join(tmp, 'bigdump.zip');
+    const rows = Array.from({ length: 200000 }, (_, i) => ({ id: String(i), filename: 'f' }));
+    await makeZip(zipPath, { photos: rows });
+    await expect(
+      importAll(openDb(':memory:'), path.join(tmp, 'dbd'), zipPath, { maxTotalBytes: 1024 })
+    ).rejects.toThrow(/dump\.json expands to more than/);
+  });
+
   it('rejects a dump row with an unexpected column key', async () => {
     const zipPath = path.join(tmp, 'hostile.zip');
     await makeZip(zipPath, {

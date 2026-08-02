@@ -82,6 +82,13 @@ export async function importAll(
   const zip = await unzipper.Open.file(zipPath);
   const dumpEntry = zip.files.find((f) => f.path === 'dump.json');
   if (!dumpEntry) throw new Error('dump.json missing from archive');
+  // Zip-bomb defense: reject a dump whose declared uncompressed size already
+  // blows the cap, from the central directory, before decompressing it.
+  if (dumpEntry.uncompressedSize > maxTotalBytes) {
+    throw new Error(
+      `dump.json expands to more than ${maxTotalBytes} bytes; refusing to extract`
+    );
+  }
   const dump = JSON.parse((await dumpEntry.buffer()).toString('utf8'));
   if (dump === null || typeof dump !== 'object' || Array.isArray(dump)) {
     throw new Error('dump.json must be a JSON object mapping table names to rows');
@@ -105,14 +112,16 @@ export async function importAll(
     // inside dataDir, defeating traversal like `photos/../../escape`.
     const dest = path.resolve(dataDir, rel);
     if (!(dest === base || dest.startsWith(base + path.sep))) continue;
-    const buf = await f.buffer();
-    // Zip-bomb defense: cap total uncompressed bytes written to disk.
-    totalBytes += buf.length;
+    // Zip-bomb defense: enforce the byte cap against the declared
+    // uncompressed size from the central directory BEFORE decompressing, so a
+    // single high-ratio entry can't inflate to GBs in memory first.
+    totalBytes += f.uncompressedSize;
     if (totalBytes > maxTotalBytes) {
       throw new Error(
         `archive expands to more than ${maxTotalBytes} bytes; refusing to extract`
       );
     }
+    const buf = await f.buffer();
     fs.mkdirSync(path.dirname(dest), { recursive: true });
     fs.writeFileSync(dest, buf);
   }
