@@ -83,6 +83,9 @@ export async function importAll(
   const dumpEntry = zip.files.find((f) => f.path === 'dump.json');
   if (!dumpEntry) throw new Error('dump.json missing from archive');
   const dump = JSON.parse((await dumpEntry.buffer()).toString('utf8'));
+  if (dump === null || typeof dump !== 'object' || Array.isArray(dump)) {
+    throw new Error('dump.json must be a JSON object mapping table names to rows');
+  }
 
   const base = path.resolve(dataDir);
   let entryCount = 0;
@@ -119,9 +122,17 @@ export async function importAll(
   db.transaction(() => {
     db.prepare('delete from settings').run();
     for (const t of TABLES) {
-      const rows = (dump[t] ?? []) as any[];
+      const raw = dump[t];
+      if (raw === undefined || raw === null) continue;
+      if (!Array.isArray(raw)) {
+        throw new Error(`dump.json: expected an array of rows for table "${t}"`);
+      }
+      const rows = raw as any[];
       const allowed = allow[t];
       for (const row of rows) {
+        if (row === null || typeof row !== 'object' || Array.isArray(row)) {
+          throw new Error(`dump.json: each row in table "${t}" must be an object`);
+        }
         const copy = { ...row };
         if (copy.__embedding_b64) {
           copy.embedding = Buffer.from(copy.embedding, 'base64');
