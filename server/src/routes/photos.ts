@@ -32,7 +32,10 @@ const metaSchema = z.object({
           z.number().finite().min(0).max(10000),
           z.number().finite().min(0).max(10000),
         ]),
-        embedding: z.string().min(1), // base64 Float32Array(512)
+        // base64 Float32Array(512) ≈ 2732 chars; cap well above that so we
+        // never base64-decode an absurd input. Exact byte length is still
+        // checked in decodeEmbedding.
+        embedding: z.string().min(1).max(4096, 'embedding string too long'),
       })
     )
     .max(24),
