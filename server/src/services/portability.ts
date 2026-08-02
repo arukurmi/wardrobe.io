@@ -14,6 +14,15 @@ const TABLES = [
   'settings',
 ] as const;
 
+/** Zip-bomb defense: hard caps on how much an untrusted archive may expand to. */
+export const MAX_ENTRIES = 100_000;
+export const MAX_TOTAL_BYTES = 2 * 1024 * 1024 * 1024; // 2 GiB
+
+export interface ImportLimits {
+  maxEntries?: number;
+  maxTotalBytes?: number;
+}
+
 /** Zip of every image file + a JSON dump of all tables (embeddings base64). */
 export function exportAll(db: Db, dataDir: string, out: Writable): Promise<void> {
   const dump: Record<string, unknown[]> = {};
@@ -43,7 +52,13 @@ export function exportAll(db: Db, dataDir: string, out: Writable): Promise<void>
 }
 
 /** Full restore into an empty database. Refuses if any photos exist. */
-export async function importAll(db: Db, dataDir: string, zipPath: string): Promise<void> {
+export async function importAll(
+  db: Db,
+  dataDir: string,
+  zipPath: string,
+  limits: ImportLimits = {}
+): Promise<void> {
+  const maxEntries = limits.maxEntries ?? MAX_ENTRIES;
   const existing = (db.prepare('select count(*) as n from photos').get() as any).n;
   if (existing > 0) throw new Error('import requires an empty database');
 
@@ -52,8 +67,13 @@ export async function importAll(db: Db, dataDir: string, zipPath: string): Promi
   if (!dumpEntry) throw new Error('dump.json missing from archive');
   const dump = JSON.parse((await dumpEntry.buffer()).toString('utf8'));
 
+  let entryCount = 0;
   for (const f of zip.files) {
     if (f.type !== 'File') continue;
+    // Zip-bomb defense: refuse archives with an implausible number of entries.
+    if (++entryCount > maxEntries) {
+      throw new Error(`archive has too many entries (> ${maxEntries}); refusing to extract`);
+    }
     // only restore into the two known image dirs; ignore anything else
     const rel = path.normalize(f.path);
     if (!(rel.startsWith('photos/') || rel.startsWith('pieces/'))) continue;
