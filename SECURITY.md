@@ -31,14 +31,18 @@ Enable it by setting an environment variable before starting the server:
 WARDROBE_TOKEN="$(openssl rand -hex 32)" npm run dev   # in ./server
 ```
 
-When `WARDROBE_TOKEN` is set, every `/api/*` request must send:
+When `WARDROBE_TOKEN` is set, every `/api/*` request **and** every `/data/*`
+image request must send:
 
 ```
 Authorization: Bearer <token>
 ```
 
-- The token is compared using a constant-time comparison
-  (`node:crypto` `timingSafeEqual`, length-guarded) to avoid timing leaks.
+- The gate covers **both** the JSON API (`/api`) and the served image files
+  (`/data`), so enabling it protects your photos, not just metadata.
+- The token is compared in constant time: both sides are hashed to a
+  fixed-length SHA-256 digest and compared with `node:crypto` `timingSafeEqual`,
+  so neither the value nor the length of a guessed token leaks via timing.
 - Missing or incorrect tokens receive `401 { "error": "unauthorized" }`.
 - `GET /api/health` stays reachable without a token so liveness probes work.
 - Leave `WARDROBE_TOKEN` unset (or empty) to disable the gate entirely.

@@ -98,9 +98,10 @@ normal flow is unchanged. Set `WARDROBE_TOKEN` before starting the server:
 cd server && WARDROBE_TOKEN="$(openssl rand -hex 32)" npm run dev
 ```
 
-Every `/api/*` request must then send `Authorization: Bearer <token>` (compared
-in constant time); `GET /api/health` stays open for probes. Full threat model,
-reporting instructions, and an `WARDROBE_HSTS` note live in
+Every `/api/*` request **and** every `/data/*` image then needs
+`Authorization: Bearer <token>` (compared in constant time), so your photos are
+protected too — not just the metadata; `GET /api/health` stays open for probes.
+Full threat model, reporting instructions, and an `WARDROBE_HSTS` note live in
 [SECURITY.md](SECURITY.md).
 
 ### Environment variables (server)
@@ -109,7 +110,7 @@ reporting instructions, and an `WARDROBE_HSTS` note live in
 |---|---|---|
 | `PORT` | `3001` | API listen port. |
 | `WARDROBE_DATA` | `./data` | Directory for the SQLite db + uploaded images. |
-| `WARDROBE_TOKEN` | *(unset)* | Optional bearer token. Unset/empty ⇒ gate disabled. Set ⇒ `/api/*` requires `Authorization: Bearer <token>`. |
+| `WARDROBE_TOKEN` | *(unset)* | Optional bearer token. Unset/empty ⇒ gate disabled. Set ⇒ `/api/*` and `/data/*` require `Authorization: Bearer <token>`. |
 
 ## 🗺 Roadmap
 
