@@ -123,6 +123,9 @@ export async function importAll(
     }
     const buf = await f.buffer();
     fs.mkdirSync(path.dirname(dest), { recursive: true });
+    // Defensive: a pre-existing symlink at dest could redirect the write
+    // outside dataDir; drop any existing node before writing.
+    fs.rmSync(dest, { force: true });
     fs.writeFileSync(dest, buf);
   }
 
