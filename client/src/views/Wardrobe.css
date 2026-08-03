@@ -22,6 +22,12 @@
   padding: 0.35rem 0.9rem;
   font-size: 0.82rem;
   color: var(--ink-dim);
+  text-transform: capitalize;
+}
+
+.pill:hover:not(.on) {
+  color: var(--ink);
+  border-color: var(--border-strong);
 }
 
 .pill.on {
