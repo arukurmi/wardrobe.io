@@ -105,6 +105,7 @@ export function Review() {
             <img src={p.cropUrl} alt="" />
             <select
               value={p.category}
+              aria-label="Category for this piece"
               onChange={async (e) => {
                 await api.patchPiece(p.id, { category: e.target.value as Category });
                 refetchPhotos();
