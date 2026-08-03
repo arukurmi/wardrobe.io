@@ -4,8 +4,20 @@ import { formatRupees } from '../lib/format';
 import './Stats.css';
 
 export function Stats() {
-  const { data: s } = useData(() => api.getStats());
-  if (!s) return <h1>Stats</h1>;
+  const { data: s, error, loading } = useData(() => api.getStats());
+  if (!s)
+    return (
+      <section>
+        <h1>Stats</h1>
+        {error ? (
+          <p className="error-banner" role="alert">
+            Couldn't load stats: {error}
+          </p>
+        ) : (
+          loading && <p className="loading">Crunching your numbers…</p>
+        )}
+      </section>
+    );
 
   const maxCat = Math.max(1, ...s.byCategory.map((c) => c.count));
 
