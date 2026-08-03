@@ -1,6 +1,7 @@
 import { api } from '../api/client';
 import { CATEGORIES, type Category } from '../api/types';
 import { useData } from '../hooks/useData';
+import { formatPercent } from '../lib/format';
 import './Review.css';
 
 export function Review() {
@@ -32,7 +33,7 @@ export function Review() {
                 <figcaption>{s.pieceGarment?.name ?? 'new piece'}</figcaption>
               </figure>
               <div className="sugg-sim">
-                {(s.similarity * 100).toFixed(0)}%
+                {formatPercent(s.similarity)}
                 <span>similar</span>
               </div>
               <figure>
