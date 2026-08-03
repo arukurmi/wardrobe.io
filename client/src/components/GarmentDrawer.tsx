@@ -16,6 +16,14 @@ export function GarmentDrawer(props: {
     api.getGarment(props.garmentId).then(setG, () => props.onClose());
   }, [props.garmentId]);
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') props.onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [props.onClose]);
+
   if (!g) return null;
 
   const save = async (patch: Parameters<typeof api.patchGarment>[1]) => {
@@ -29,10 +37,17 @@ export function GarmentDrawer(props: {
   };
 
   return (
-    <aside className="drawer">
+    <aside
+      className="drawer"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="drawer-title"
+    >
       <header>
-        <h2>{g.name}</h2>
-        <button onClick={props.onClose}>close</button>
+        <h2 id="drawer-title">{g.name}</h2>
+        <button aria-label="Close garment details" onClick={props.onClose}>
+          close
+        </button>
       </header>
 
       {g.coverUrl && <img className="drawer-cover" src={g.coverUrl} alt={g.name} />}
