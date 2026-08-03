@@ -97,6 +97,18 @@ select:focus {
   border-color: var(--accent);
 }
 
+/* Visible keyboard focus everywhere interactive, without showing a ring
+ * on mouse clicks. :focus-visible only fires for keyboard/programmatic
+ * focus, so pointer users keep the clean look. */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+a:focus-visible {
+  border-radius: 4px;
+}
+
 ::selection {
   background: var(--accent);
   color: var(--accent-ink);
