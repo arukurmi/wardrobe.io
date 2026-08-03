@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import { CATEGORIES, type Category, type GarmentDetail } from '../api/types';
-import { countLabel } from '../lib/format';
+import { countLabel, formatDate } from '../lib/format';
 import './GarmentDrawer.css';
 
 export function GarmentDrawer(props: {
@@ -119,7 +119,10 @@ export function GarmentDrawer(props: {
           <ul className="drawer-merges">
             {g.mergeHistory.map((m) => (
               <li key={m.id}>
-                {m.created_at} {m.undone_at ? '(undone)' : ''}
+                <span>
+                  {formatDate(m.created_at)}
+                  {m.undone_at ? ' (undone)' : ''}
+                </span>
                 {!m.undone_at && m.target_garment_id === g.id && (
                   <button
                     onClick={async () => {

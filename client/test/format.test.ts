@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { formatRupees, formatPercent, countLabel } from '../src/lib/format';
+import {
+  formatRupees,
+  formatPercent,
+  countLabel,
+  formatDate,
+} from '../src/lib/format';
 
 describe('formatRupees', () => {
   it('renders paise as whole rupees with the ₹ sign', () => {
@@ -25,6 +30,16 @@ describe('formatPercent', () => {
   it('clamps values outside 0..1', () => {
     expect(formatPercent(1.4)).toBe('100%');
     expect(formatPercent(-0.2)).toBe('0%');
+  });
+});
+
+describe('formatDate', () => {
+  it('renders an ISO timestamp as a short date', () => {
+    expect(formatDate('2026-08-02T10:00:00Z')).toBe('2 Aug 2026');
+  });
+
+  it('returns the input unchanged when it is not a valid date', () => {
+    expect(formatDate('not-a-date')).toBe('not-a-date');
   });
 });
 

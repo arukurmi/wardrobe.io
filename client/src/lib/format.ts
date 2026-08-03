@@ -14,6 +14,19 @@ export function formatPercent(ratio: number): string {
   return `${Math.round(clamped * 100)}%`;
 }
 
+/** Format an ISO timestamp as a short, readable date, e.g.
+ * "2026-08-02T10:00:00Z" -> "2 Aug 2026". Returns the original string
+ * unchanged if it isn't a parseable date. */
+export function formatDate(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString('en-IN', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
 /** Pluralize a noun by count: countLabel(1, 'photo') -> "1 photo",
  * countLabel(3, 'photo') -> "3 photos". Pass an explicit plural for
  * irregular nouns. */
