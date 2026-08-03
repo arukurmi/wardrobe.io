@@ -19,7 +19,11 @@ export function Outfits() {
       <div className="outfits-grid">
         {photos?.map((ph) => (
           <figure key={ph.id} className="outfit">
-            <img src={`/data/photos/${ph.filename}`} alt="" loading="lazy" />
+            <img
+              src={`/data/photos/${ph.filename}`}
+              alt="Outfit photo"
+              loading="lazy"
+            />
             <figcaption>
               <div className="outfit-chips">
                 {ph.pieces?.length ? (

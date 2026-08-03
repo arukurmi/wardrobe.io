@@ -77,7 +77,11 @@ export function Review() {
       <div className="undetected-grid">
         {undetected.map((p) => (
           <figure key={p.id}>
-            <img src={`/data/photos/${p.filename}`} alt="" loading="lazy" />
+            <img
+              src={`/data/photos/${p.filename}`}
+              alt="Photo with no detected pieces"
+              loading="lazy"
+            />
             <button
               className="danger"
               onClick={async () => {
