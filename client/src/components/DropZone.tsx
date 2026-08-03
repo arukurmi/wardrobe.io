@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
+import { isAcceptedImage } from '../lib/images';
 import './DropZone.css';
-
-const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 export function DropZone(props: { onFiles: (files: File[]) => void }) {
   const [active, setActive] = useState(false);
@@ -24,7 +23,7 @@ export function DropZone(props: { onFiles: (files: File[]) => void }) {
       depth = 0;
       setActive(false);
       const files = [...(e.dataTransfer?.files ?? [])].filter((f) =>
-        IMAGE_TYPES.includes(f.type)
+        isAcceptedImage(f.type)
       );
       if (files.length) props.onFiles(files);
     };
