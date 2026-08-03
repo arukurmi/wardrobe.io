@@ -62,8 +62,3 @@
 .outfit:hover .outfit-delete {
   opacity: 1;
 }
-
-.outfits-empty {
-  color: var(--ink-dim);
-  padding: 3rem 0;
-}

@@ -118,6 +118,24 @@ a:focus-visible {
   color: var(--accent-ink);
 }
 
+/* Shared empty-state block: centered, generously padded, muted. */
+.empty {
+  text-align: center;
+  padding: 5rem 1rem;
+  color: var(--ink-dim);
+  max-width: 32rem;
+  margin-inline: auto;
+}
+
+.empty h2 {
+  color: var(--ink);
+  margin-bottom: 0.5rem;
+}
+
+.empty p {
+  margin: 0;
+}
+
 /* Respect users who ask for less motion: neutralize transitions,
  * animations and scroll-driven movement app-wide. */
 @media (prefers-reduced-motion: reduce) {

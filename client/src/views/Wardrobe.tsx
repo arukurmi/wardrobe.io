@@ -76,7 +76,7 @@ export function Wardrobe() {
       </div>
 
       {garments && garments.length === 0 && (
-        <div className="wardrobe-empty">
+        <div className="empty">
           <h2>Nothing here yet</h2>
           <p>Drop outfit photos anywhere on this page — pieces show up here.</p>
         </div>
