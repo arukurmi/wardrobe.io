@@ -113,3 +113,16 @@ a:focus-visible {
   background: var(--accent);
   color: var(--accent-ink);
 }
+
+/* Respect users who ask for less motion: neutralize transitions,
+ * animations and scroll-driven movement app-wide. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
