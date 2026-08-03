@@ -118,6 +118,24 @@ a:focus-visible {
   color: var(--accent-ink);
 }
 
+/* Inline error banner for failed data loads. */
+.error-banner {
+  border: 1px solid var(--danger);
+  background: rgba(224, 82, 82, 0.1);
+  color: var(--danger);
+  border-radius: var(--radius);
+  padding: 0.7rem 1rem;
+  font-size: 0.9rem;
+  margin: 1rem 0;
+}
+
+/* Muted "loading…" line. */
+.loading {
+  color: var(--ink-faint);
+  font-size: 0.9rem;
+  padding: 2rem 0;
+}
+
 /* Shared empty-state block: centered, generously padded, muted. */
 .empty {
   text-align: center;
