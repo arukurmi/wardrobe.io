@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import type { Garment } from '../api/types';
 import './MergeModal.css';
 
@@ -9,12 +10,27 @@ export function MergeModal(props: {
   onCancel: () => void;
 }) {
   const { source, target } = props;
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !props.busy) props.onCancel();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [props.busy, props.onCancel]);
+
   const thumb = (g: Garment) =>
     g.coverUrl ? <img src={g.coverUrl} alt={g.name} /> : <div className="mm-empty" />;
   return (
     <div className="mm-backdrop" onClick={props.onCancel}>
-      <div className="mm-box" onClick={(e) => e.stopPropagation()}>
-        <h2>Merge these two?</h2>
+      <div
+        className="mm-box"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="mm-title"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 id="mm-title">Merge these two?</h2>
         <div className="mm-pair">
           <figure>
             {thumb(source)}
