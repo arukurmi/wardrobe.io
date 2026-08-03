@@ -1,9 +1,7 @@
 import { api } from '../api/client';
 import { useData } from '../hooks/useData';
+import { formatRupees } from '../lib/format';
 import './Stats.css';
-
-const rupees = (cents: number) =>
-  `₹${(cents / 100).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
 
 export function Stats() {
   const { data: s } = useData(() => api.getStats());
@@ -25,7 +23,7 @@ export function Stats() {
           <span className="tile-l">outfit photos</span>
         </div>
         <div className="tile accent">
-          <span className="tile-n">{rupees(s.totalValueCents)}</span>
+          <span className="tile-n">{formatRupees(s.totalValueCents)}</span>
           <span className="tile-l">wardrobe value</span>
         </div>
       </div>
@@ -69,7 +67,7 @@ export function Stats() {
             {s.costPerWear.map((c) => (
               <li key={c.garmentId}>
                 <span>{c.name}</span>
-                <span className="worn-count">{rupees(c.cpwCents)}</span>
+                <span className="worn-count">{formatRupees(c.cpwCents)}</span>
               </li>
             ))}
             {s.costPerWear.length === 0 && (
