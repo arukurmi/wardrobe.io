@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import { CATEGORIES, type Category, type GarmentDetail } from '../api/types';
+import { countLabel } from '../lib/format';
 import './GarmentDrawer.css';
 
 export function GarmentDrawer(props: {
@@ -90,7 +91,7 @@ export function GarmentDrawer(props: {
         {saving && <span className="drawer-saving">saving…</span>}
       </div>
 
-      <h3>Seen in {g.pieces.length} photo{g.pieces.length === 1 ? '' : 's'}</h3>
+      <h3>Seen in {countLabel(g.pieces.length, 'photo')}</h3>
       <div className="drawer-pieces">
         {g.pieces.map((p) => (
           <img key={p.id} src={p.cropUrl} alt="" title={p.photo?.filename} />
