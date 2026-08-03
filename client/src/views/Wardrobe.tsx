@@ -47,15 +47,18 @@ export function Wardrobe() {
         <h1>Wardrobe</h1>
         <input
           className="wardrobe-search"
+          type="search"
+          aria-label="Search garments by name, brand or color"
           placeholder="search name, brand, color…"
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
       </div>
 
-      <div className="pills">
+      <div className="pills" role="group" aria-label="Filter by category">
         <button
           className={`pill ${!category ? 'on' : ''}`}
+          aria-pressed={!category}
           onClick={() => setCategory(undefined)}
         >
           all
@@ -64,6 +67,7 @@ export function Wardrobe() {
           <button
             key={c}
             className={`pill ${category === c ? 'on' : ''}`}
+            aria-pressed={category === c}
             onClick={() => setCategory(category === c ? undefined : c)}
           >
             {c}
