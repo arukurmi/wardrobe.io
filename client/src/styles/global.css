@@ -63,6 +63,10 @@ button:hover {
   border-color: var(--accent);
 }
 
+button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
 button.primary {
   background: var(--accent);
   border-color: var(--accent);
