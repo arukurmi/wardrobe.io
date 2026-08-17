@@ -4,6 +4,7 @@ import { NavShell } from './components/NavShell';
 import { DropZone } from './components/DropZone';
 import { ProgressTray } from './components/ProgressTray';
 import { createUploadQueue } from './upload/wire';
+import { ACCEPT_ATTR } from './lib/images';
 import type { QueueItem } from './upload/queue';
 import { Wardrobe } from './views/Wardrobe';
 import { Outfits } from './views/Outfits';
@@ -30,7 +31,7 @@ export default function App() {
       <input
         ref={fileInput}
         type="file"
-        accept="image/jpeg,image/png,image/webp"
+        accept={ACCEPT_ATTR}
         multiple
         hidden
         onChange={(e) => {

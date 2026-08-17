@@ -39,6 +39,7 @@ export function Settings() {
               defaultValue={thresholds.attach}
               onMouseUp={(e) => void save({ attach: Number(e.currentTarget.value) })}
               onTouchEnd={(e) => void save({ attach: Number(e.currentTarget.value) })}
+              onKeyUp={(e) => void save({ attach: Number(e.currentTarget.value) })}
             />
             <span className="slider-hint">
               higher = fewer false merges, more duplicates to review
@@ -54,6 +55,7 @@ export function Settings() {
               defaultValue={thresholds.suggest}
               onMouseUp={(e) => void save({ suggest: Number(e.currentTarget.value) })}
               onTouchEnd={(e) => void save({ suggest: Number(e.currentTarget.value) })}
+              onKeyUp={(e) => void save({ suggest: Number(e.currentTarget.value) })}
             />
             <span className="slider-hint">
               pieces between the two thresholds land in Review
