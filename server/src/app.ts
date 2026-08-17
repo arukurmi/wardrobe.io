@@ -8,11 +8,17 @@ import { piecesRouter } from './routes/pieces.js';
 import { suggestionsRouter } from './routes/suggestions.js';
 import { statsRouter, settingsRouter, ioRouter } from './routes/misc.js';
 import { MergeError } from './services/merge.js';
+import { securityHeaders } from './middleware/securityHeaders.js';
 import { rateLimit } from './middleware/rateLimit.js';
 import { timeout } from './middleware/timeout.js';
 
 export function createApp(db: Db, dataDir: string): Express {
   const app = express();
+  app.disable('x-powered-by');
+
+  // First in the chain so every response carries the headers — including the
+  // rate limiter's 429s and the timeout middleware's 503s.
+  app.use(securityHeaders());
 
   // Short, per-request id for tracing errors in logs without leaking internals.
   app.use((req: Request, _res: Response, next: NextFunction) => {

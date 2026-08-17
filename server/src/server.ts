@@ -16,7 +16,18 @@ const app = createApp(db, dataDir);
 // user images (crops + originals)
 app.use(
   '/data',
-  express.static(dataDir, { index: false, dotfiles: 'ignore', fallthrough: false })
+  express.static(dataDir, {
+    index: false,
+    dotfiles: 'ignore',
+    fallthrough: false,
+    setHeaders: (res) => {
+      // Redundant with the global securityHeaders() middleware (which already
+      // sets this on every response); kept here as a belt-and-suspenders
+      // guarantee so served user files stay non-sniffable even if the static
+      // mount is ever relocated ahead of that middleware.
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+    },
+  })
 );
 
 // built client, with SPA fallback
