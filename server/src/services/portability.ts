@@ -54,7 +54,17 @@ export function exportAll(db: Db, dataDir: string, out: Writable): Promise<void>
   }
   return new Promise((resolve, reject) => {
     const archive = archiver('zip');
-    archive.on('error', reject);
+    archive.on('error', (err) => {
+      out.destroy(err);
+      reject(err);
+    });
+    // If the destination stream fails (e.g. the HTTP response was aborted or
+    // already ended by a timeout), stop the archive so we never write past the
+    // end of a dead stream — that would otherwise throw and crash the process.
+    out.on('error', (err) => {
+      archive.destroy();
+      reject(err);
+    });
     out.on('close', resolve);
     out.on('finish', resolve);
     archive.pipe(out);

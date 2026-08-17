@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
+import { Writable } from 'node:stream';
 import { openDb } from '../src/db.js';
 import { ingestPhoto } from '../src/services/ingest.js';
 import { exportAll, importAll } from '../src/services/portability.js';
@@ -61,5 +62,26 @@ describe('export/import', () => {
     const zipPath = path.join(tmp, 'backup.zip');
     await exportAll(db, srcData, fs.createWriteStream(zipPath));
     await expect(importAll(db, srcData, zipPath)).rejects.toThrow(/empty/);
+  });
+
+  it('rejects (does not crash) when the destination stream ends mid-export', async () => {
+    const srcData = path.join(tmp, 'data-src');
+    const db = openDb(':memory:');
+    ingestPhoto(db, srcData, {
+      originalPath: upload('o1.jpg'),
+      originalName: 'o1.jpg',
+      pieces: [],
+    });
+
+    // A response that dies (aborted / already-ended by a timeout) on first write.
+    const dead = new Writable({
+      write(_chunk, _enc, cb) {
+        cb(new Error('write after end'));
+      },
+    });
+
+    // The 'error' handler in exportAll must surface this as a rejection rather
+    // than an unhandled stream error that would take down the process.
+    await expect(exportAll(db, srcData, dead)).rejects.toThrow(/write after end/);
   });
 });
