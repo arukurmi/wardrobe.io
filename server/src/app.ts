@@ -8,6 +8,7 @@ import { piecesRouter } from './routes/pieces.js';
 import { suggestionsRouter } from './routes/suggestions.js';
 import { statsRouter, settingsRouter, ioRouter } from './routes/misc.js';
 import { MergeError } from './services/merge.js';
+import { authGate } from './middleware/authGate.js';
 import { rateLimit } from './middleware/rateLimit.js';
 import { timeout } from './middleware/timeout.js';
 
@@ -41,6 +42,9 @@ export function createApp(db: Db, dataDir: string): Express {
 
   app.use(express.json({ limit: '1mb' }));
 
+  // Optional bearer-token gate (off unless WARDROBE_TOKEN is set); health stays open.
+  app.use('/api', authGate());
+
   app.get('/api/health', (_req, res) => res.json({ ok: true }));
   app.use('/api/photos', photosRouter(db, dataDir));
   app.use('/api/garments', garmentsRouter(db));
@@ -50,6 +54,14 @@ export function createApp(db: Db, dataDir: string): Express {
   app.use('/api/stats', statsRouter(db));
   app.use('/api/settings', settingsRouter(db));
   app.use('/api/io', ioRouter(db, dataDir));
+
+  // User images (crops + originals). Gated by the same opt-in token as /api,
+  // so enabling WARDROBE_TOKEN protects the photos too — not just metadata.
+  app.use(
+    '/data',
+    authGate(),
+    express.static(dataDir, { index: false, dotfiles: 'ignore', fallthrough: false })
+  );
 
   app.use((err: unknown, req: Request, res: Response, _next: NextFunction) => {
     if (err instanceof ZodError) {

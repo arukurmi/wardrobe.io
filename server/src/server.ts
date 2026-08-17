@@ -11,13 +11,8 @@ const dataDir = process.env.WARDROBE_DATA ?? path.join(root, 'data');
 fs.mkdirSync(dataDir, { recursive: true });
 
 const db = openDb(path.join(dataDir, 'wardrobe.db'));
+// createApp serves the API and the (optionally token-gated) /data images.
 const app = createApp(db, dataDir);
-
-// user images (crops + originals)
-app.use(
-  '/data',
-  express.static(dataDir, { index: false, dotfiles: 'ignore', fallthrough: false })
-);
 
 // built client, with SPA fallback
 const clientDist = path.join(root, 'client', 'dist');

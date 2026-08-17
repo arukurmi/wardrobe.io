@@ -84,6 +84,34 @@ node scripts/simulate-client.mjs   # full ML→ingest→dedupe run in Node
 **Client** — React 19 + Vite, hand-rolled CSS (no framework), [@huggingface/transformers](https://github.com/huggingface/transformers.js) in a module Web Worker, `idb-keyval` for the refresh-proof upload queue.
 **Server** — Express + `better-sqlite3` (WAL, FK-enforced), `zod` validation, `multer` uploads, `archiver` backups. Photos live on your disk under `./data/`.
 
+## 🔒 Security
+
+wardrobe.io is a **single-user, localhost-only** app: the server binds to
+`127.0.0.1`, there's deliberately no account system, and your photos never
+leave your machine. On localhost the API is intentionally open.
+
+If you ever expose the port beyond localhost (SSH tunnel, reverse proxy), turn
+on the **optional, opt-in bearer-token gate** — it's **off by default**, so the
+normal flow is unchanged. Set `WARDROBE_TOKEN` before starting the server:
+
+```bash
+cd server && WARDROBE_TOKEN="$(openssl rand -hex 32)" npm run dev
+```
+
+Every `/api/*` request **and** every `/data/*` image then needs
+`Authorization: Bearer <token>` (compared in constant time), so your photos are
+protected too — not just the metadata; `GET /api/health` stays open for probes.
+Full threat model, reporting instructions, and an `WARDROBE_HSTS` note live in
+[SECURITY.md](SECURITY.md).
+
+### Environment variables (server)
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `PORT` | `3001` | API listen port. |
+| `WARDROBE_DATA` | `./data` | Directory for the SQLite db + uploaded images. |
+| `WARDROBE_TOKEN` | *(unset)* | Optional bearer token. Unset/empty ⇒ gate disabled. Set ⇒ `/api/*` and `/data/*` require `Authorization: Bearer <token>`. |
+
 ## 🗺 Roadmap
 
 Accounts, cloud sync, share links, PWA — the productization path lives in
