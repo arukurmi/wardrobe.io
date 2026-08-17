@@ -10,10 +10,12 @@ import './Wardrobe.css';
 export function Wardrobe() {
   const [category, setCategory] = useState<Category | undefined>();
   const [q, setQ] = useState('');
-  const { data: garments, refetch } = useData(
-    () => api.listGarments({ category, q: q || undefined }),
-    [category, q]
-  );
+  const {
+    data: garments,
+    error,
+    loading,
+    refetch,
+  } = useData(() => api.listGarments({ category, q: q || undefined }), [category, q]);
   const [merge, setMerge] = useState<{ source: Garment; target: Garment } | null>(null);
   const [busy, setBusy] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
@@ -47,15 +49,18 @@ export function Wardrobe() {
         <h1>Wardrobe</h1>
         <input
           className="wardrobe-search"
+          type="search"
+          aria-label="Search garments by name, brand or color"
           placeholder="search name, brand, color…"
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
       </div>
 
-      <div className="pills">
+      <div className="pills" role="group" aria-label="Filter by category">
         <button
           className={`pill ${!category ? 'on' : ''}`}
+          aria-pressed={!category}
           onClick={() => setCategory(undefined)}
         >
           all
@@ -64,6 +69,7 @@ export function Wardrobe() {
           <button
             key={c}
             className={`pill ${category === c ? 'on' : ''}`}
+            aria-pressed={category === c}
             onClick={() => setCategory(category === c ? undefined : c)}
           >
             {c}
@@ -71,8 +77,16 @@ export function Wardrobe() {
         ))}
       </div>
 
-      {garments && garments.length === 0 && (
-        <div className="wardrobe-empty">
+      {error && (
+        <p className="error-banner" role="alert">
+          Couldn't load your wardrobe: {error}
+        </p>
+      )}
+
+      {loading && !garments && <p className="loading">Loading your wardrobe…</p>}
+
+      {garments && garments.length === 0 && !error && (
+        <div className="empty">
           <h2>Nothing here yet</h2>
           <p>Drop outfit photos anywhere on this page — pieces show up here.</p>
         </div>

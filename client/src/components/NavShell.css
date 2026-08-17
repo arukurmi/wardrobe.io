@@ -80,3 +80,28 @@
   text-align: center;
   border-top: 1px solid var(--border);
 }
+
+@media (max-width: 640px) {
+  .shell-header {
+    gap: 1rem;
+    padding: 0.85rem 1rem;
+  }
+
+  .shell-main {
+    padding: 1.25rem 1rem;
+  }
+
+  /* Let the tab bar scroll on its own instead of overflowing the header. */
+  .tabs {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab {
+    white-space: nowrap;
+  }
+}
