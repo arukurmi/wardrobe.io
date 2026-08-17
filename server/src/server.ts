@@ -4,6 +4,7 @@ import express from 'express';
 import { fileURLToPath } from 'node:url';
 import { openDb } from './db.js';
 import { createApp } from './app.js';
+import { blockTraversal } from './lib/staticGuard.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..', '..');
@@ -16,6 +17,7 @@ const app = createApp(db, dataDir);
 // user images (crops + originals)
 app.use(
   '/data',
+  blockTraversal,
   express.static(dataDir, { index: false, dotfiles: 'ignore', fallthrough: false })
 );
 

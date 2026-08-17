@@ -9,6 +9,7 @@ import { ingestPhoto, type IngestPieceInput } from '../services/ingest.js';
 import { listPhotos, getPhoto, deletePhoto } from '../repo/photos.js';
 import { piecesForPhoto, piecesForGarment } from '../repo/pieces.js';
 import { getGarment, updateGarment } from '../repo/garments.js';
+import { isSafeName, safeJoin } from '../lib/safepath.js';
 import { guardIdParam } from '../lib/validate.js';
 
 const EMBEDDING_DIM = 512;
@@ -140,9 +141,19 @@ export function photosRouter(db: Db, dataDir: string): Router {
       }
       deletePhoto(db, ph.id);
     })();
-    fs.rmSync(path.join(dataDir, 'photos', ph.filename), { force: true });
+    if (isSafeName(ph.filename))
+      fs.rmSync(safeJoin(dataDir, 'photos', ph.filename), { force: true });
+    else
+      console.warn(
+        `skipped unlink of photo ${ph.id}: unsafe stored filename ${JSON.stringify(ph.filename)}`
+      );
     for (const p of pieces)
-      fs.rmSync(path.join(dataDir, 'pieces', p.crop_filename), { force: true });
+      if (isSafeName(p.crop_filename))
+        fs.rmSync(safeJoin(dataDir, 'pieces', p.crop_filename), { force: true });
+      else
+        console.warn(
+          `skipped unlink of crop for piece ${p.id}: unsafe stored filename ${JSON.stringify(p.crop_filename)}`
+        );
     res.json({ ok: true });
   });
 
