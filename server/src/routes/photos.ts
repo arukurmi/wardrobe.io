@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, type Request, type Response, type NextFunction } from 'express';
 import multer from 'multer';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -12,6 +12,15 @@ import { getGarment, updateGarment } from '../repo/garments.js';
 import { guardIdParam } from '../lib/validate.js';
 
 const EMBEDDING_DIM = 512;
+const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp'];
+
+/** Raised by the multer fileFilter for a disallowed mimetype. */
+class UnsupportedFileTypeError extends Error {
+  constructor() {
+    super('unsupported file type');
+    this.name = 'UnsupportedFileTypeError';
+  }
+}
 
 const metaSchema = z
   .object({
@@ -26,14 +35,41 @@ const metaSchema = z
               z.number().finite().min(0).max(10000),
               z.number().finite().min(0).max(10000),
             ]),
-            // base64 Float32Array(512) ≈ 2732 chars; upper-bounded for safety
-            embedding: z.string().min(1).max(4096),
+            // base64 Float32Array(512) ≈ 2732 chars; cap well above that so we
+            // never base64-decode an absurd input. Exact byte length is still
+            // checked in decodeEmbedding.
+            embedding: z.string().min(1).max(4096, 'embedding string too long'),
           })
           .strict()
       )
       .max(24),
   })
   .strict();
+
+/** Every tmp file multer wrote for this request, across all fields. */
+function uploadedFiles(req: Request): Express.Multer.File[] {
+  const files = req.files as Record<string, Express.Multer.File[]> | undefined;
+  return files ? Object.values(files).flat() : [];
+}
+
+/** Best-effort removal of tmp files; safe to call on any error path. */
+function rmTmpFiles(files: Express.Multer.File[]): void {
+  for (const f of files) fs.rmSync(f.path, { force: true });
+}
+
+/**
+ * `originalname` is fully user-controlled. Strip path separators and control
+ * chars and cap the length before it reaches ingest, so it can only ever be
+ * used as a plain label / extension source — never as a path component.
+ */
+function sanitizeOriginalName(name: string): string {
+  const cleaned = name
+    .replace(/[/\\]/g, '_')
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\x00-\x1f\x7f]/g, '')
+    .slice(0, 255);
+  return cleaned || 'upload';
+}
 
 function decodeEmbedding(b64: string): Float32Array {
   const buf = Buffer.from(b64, 'base64');
@@ -57,29 +93,54 @@ export function photosRouter(db: Db, dataDir: string): Router {
     dest: tmpDir,
     limits: { fileSize: 15 * 1024 * 1024, files: 25 },
     fileFilter: (_req, file, cb) => {
-      const ok = ['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype);
-      cb(null, ok);
+      // Reject with an error (not cb(null,false)) so the caller gets a clear
+      // 400 instead of a downstream "original required" message.
+      if (ALLOWED_MIME.includes(file.mimetype)) cb(null, true);
+      else cb(new UnsupportedFileTypeError());
     },
   });
+
+  const uploadFields = upload.fields([
+    { name: 'original', maxCount: 1 },
+    { name: 'crops', maxCount: 24 },
+  ]);
+
+  // Translate multer limit errors and mimetype rejections into descriptive
+  // 400s. multer 2.x already removes its own tmp files before calling back on
+  // error; the extra sweep here is a precautionary catch-all.
+  const handleUpload = (req: Request, res: Response, next: NextFunction) => {
+    uploadFields(req, res, (err: unknown) => {
+      if (!err) return next();
+      rmTmpFiles(uploadedFiles(req));
+      if (err instanceof UnsupportedFileTypeError) {
+        return res
+          .status(400)
+          .json({ error: 'unsupported file type (only jpeg/png/webp allowed)' });
+      }
+      if (err instanceof multer.MulterError) {
+        const messages: Record<string, string> = {
+          LIMIT_FILE_SIZE: 'file too large (max 15MB per image)',
+          LIMIT_FILE_COUNT: 'too many files (max 25)',
+          LIMIT_PART_COUNT: 'too many upload parts',
+          LIMIT_UNEXPECTED_FILE: 'unexpected file field',
+        };
+        return res.status(400).json({ error: messages[err.code] ?? `upload rejected: ${err.message}` });
+      }
+      return next(err);
+    });
+  };
 
   const router = Router();
   guardIdParam(router);
 
   router.post(
     '/',
-    upload.fields([
-      { name: 'original', maxCount: 1 },
-      { name: 'crops', maxCount: 24 },
-    ]),
+    handleUpload,
     (req, res) => {
       const files = req.files as Record<string, Express.Multer.File[]> | undefined;
       const original = files?.original?.[0];
       const crops = files?.crops ?? [];
-      const cleanup = () => {
-        for (const f of [original, ...crops]) {
-          if (f) fs.rmSync(f.path, { force: true });
-        }
-      };
+      const cleanup = () => rmTmpFiles(uploadedFiles(req));
       try {
         if (!original) {
           cleanup();
@@ -100,7 +161,7 @@ export function photosRouter(db: Db, dataDir: string): Router {
         }));
         const result = ingestPhoto(db, dataDir, {
           originalPath: original.path,
-          originalName: original.originalname,
+          originalName: sanitizeOriginalName(original.originalname),
           pieces,
         });
         res.status(201).json(result);
