@@ -1,6 +1,7 @@
 import { api } from '../api/client';
 import { CATEGORIES, type Category } from '../api/types';
 import { useData } from '../hooks/useData';
+import { formatPercent } from '../lib/format';
 import './Review.css';
 
 export function Review() {
@@ -32,7 +33,7 @@ export function Review() {
                 <figcaption>{s.pieceGarment?.name ?? 'new piece'}</figcaption>
               </figure>
               <div className="sugg-sim">
-                {(s.similarity * 100).toFixed(0)}%
+                {formatPercent(s.similarity)}
                 <span>similar</span>
               </div>
               <figure>
@@ -76,7 +77,11 @@ export function Review() {
       <div className="undetected-grid">
         {undetected.map((p) => (
           <figure key={p.id}>
-            <img src={`/data/photos/${p.filename}`} alt="" loading="lazy" />
+            <img
+              src={`/data/photos/${p.filename}`}
+              alt="Photo with no detected pieces"
+              loading="lazy"
+            />
             <button
               className="danger"
               onClick={async () => {
@@ -100,6 +105,7 @@ export function Review() {
             <img src={p.cropUrl} alt="" />
             <select
               value={p.category}
+              aria-label="Category for this piece"
               onChange={async (e) => {
                 await api.patchPiece(p.id, { category: e.target.value as Category });
                 refetchPhotos();

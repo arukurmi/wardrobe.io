@@ -12,14 +12,19 @@ export function Outfits() {
     <section>
       <h1>Outfits</h1>
       {photos && photos.length === 0 && (
-        <div className="outfits-empty">
-          <p>No photos yet — drop some anywhere.</p>
+        <div className="empty">
+          <h2>No outfits yet</h2>
+          <p>Drop photos anywhere and they'll appear here, broken into pieces.</p>
         </div>
       )}
       <div className="outfits-grid">
         {photos?.map((ph) => (
           <figure key={ph.id} className="outfit">
-            <img src={`/data/photos/${ph.filename}`} alt="" loading="lazy" />
+            <img
+              src={`/data/photos/${ph.filename}`}
+              alt="Outfit photo"
+              loading="lazy"
+            />
             <figcaption>
               <div className="outfit-chips">
                 {ph.pieces?.length ? (

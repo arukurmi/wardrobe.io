@@ -1,4 +1,5 @@
 import type { Garment } from '../api/types';
+import { garmentSubtitle } from '../lib/garment';
 import './GarmentCard.css';
 
 export function GarmentCard(props: {
@@ -40,9 +41,7 @@ export function GarmentCard(props: {
       </div>
       <footer>
         <span className="gcard-name">{g.name}</span>
-        <span className="gcard-meta">
-          {[g.brand, g.color].filter(Boolean).join(' · ') || g.category}
-        </span>
+        <span className="gcard-meta">{garmentSubtitle(g)}</span>
       </footer>
     </article>
   );

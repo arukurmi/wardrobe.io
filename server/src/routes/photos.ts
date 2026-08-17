@@ -9,6 +9,7 @@ import { ingestPhoto, type IngestPieceInput } from '../services/ingest.js';
 import { listPhotos, getPhoto, deletePhoto } from '../repo/photos.js';
 import { piecesForPhoto, piecesForGarment } from '../repo/pieces.js';
 import { getGarment, updateGarment } from '../repo/garments.js';
+import { guardIdParam } from '../lib/validate.js';
 
 const EMBEDDING_DIM = 512;
 const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp'];
@@ -21,25 +22,29 @@ class UnsupportedFileTypeError extends Error {
   }
 }
 
-const metaSchema = z.object({
-  pieces: z
-    .array(
-      z.object({
-        category: z.enum(CATEGORIES as [string, ...string[]]),
-        bbox: z.tuple([
-          z.number().finite().min(0).max(10000),
-          z.number().finite().min(0).max(10000),
-          z.number().finite().min(0).max(10000),
-          z.number().finite().min(0).max(10000),
-        ]),
-        // base64 Float32Array(512) ≈ 2732 chars; cap well above that so we
-        // never base64-decode an absurd input. Exact byte length is still
-        // checked in decodeEmbedding.
-        embedding: z.string().min(1).max(4096, 'embedding string too long'),
-      })
-    )
-    .max(24),
-});
+const metaSchema = z
+  .object({
+    pieces: z
+      .array(
+        z
+          .object({
+            category: z.enum(CATEGORIES as [string, ...string[]]),
+            bbox: z.tuple([
+              z.number().finite().min(0).max(10000),
+              z.number().finite().min(0).max(10000),
+              z.number().finite().min(0).max(10000),
+              z.number().finite().min(0).max(10000),
+            ]),
+            // base64 Float32Array(512) ≈ 2732 chars; cap well above that so we
+            // never base64-decode an absurd input. Exact byte length is still
+            // checked in decodeEmbedding.
+            embedding: z.string().min(1).max(4096, 'embedding string too long'),
+          })
+          .strict()
+      )
+      .max(24),
+  })
+  .strict();
 
 /** Every tmp file multer wrote for this request, across all fields. */
 function uploadedFiles(req: Request): Express.Multer.File[] {
@@ -126,6 +131,7 @@ export function photosRouter(db: Db, dataDir: string): Router {
   };
 
   const router = Router();
+  guardIdParam(router);
 
   router.post(
     '/',

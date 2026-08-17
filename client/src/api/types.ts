@@ -19,12 +19,15 @@ export const CATEGORIES: Category[] = [
   'accessory',
 ];
 
+/** [x, y, width, height] in source-image pixels. */
+export type BBox = [number, number, number, number];
+
 export type Piece = {
   id: string;
   photoId: string;
   garmentId: string;
   category: Category;
-  bbox: number[];
+  bbox: BBox;
   cropUrl: string;
 };
 
