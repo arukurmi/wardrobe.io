@@ -1,13 +1,23 @@
 import { api } from '../api/client';
 import { useData } from '../hooks/useData';
+import { formatRupees } from '../lib/format';
 import './Stats.css';
 
-const rupees = (cents: number) =>
-  `₹${(cents / 100).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
-
 export function Stats() {
-  const { data: s } = useData(() => api.getStats());
-  if (!s) return <h1>Stats</h1>;
+  const { data: s, error, loading } = useData(() => api.getStats());
+  if (!s)
+    return (
+      <section>
+        <h1>Stats</h1>
+        {error ? (
+          <p className="error-banner" role="alert">
+            Couldn't load stats: {error}
+          </p>
+        ) : (
+          loading && <p className="loading">Crunching your numbers…</p>
+        )}
+      </section>
+    );
 
   const maxCat = Math.max(1, ...s.byCategory.map((c) => c.count));
 
@@ -25,7 +35,7 @@ export function Stats() {
           <span className="tile-l">outfit photos</span>
         </div>
         <div className="tile accent">
-          <span className="tile-n">{rupees(s.totalValueCents)}</span>
+          <span className="tile-n">{formatRupees(s.totalValueCents)}</span>
           <span className="tile-l">wardrobe value</span>
         </div>
       </div>
@@ -69,7 +79,7 @@ export function Stats() {
             {s.costPerWear.map((c) => (
               <li key={c.garmentId}>
                 <span>{c.name}</span>
-                <span className="worn-count">{rupees(c.cpwCents)}</span>
+                <span className="worn-count">{formatRupees(c.cpwCents)}</span>
               </li>
             ))}
             {s.costPerWear.length === 0 && (

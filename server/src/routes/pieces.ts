@@ -7,6 +7,7 @@ import { getPiece, updatePiece, deletePiece, piecesForGarment } from '../repo/pi
 import { getGarment, updateGarment } from '../repo/garments.js';
 import { pieceDto } from './photos.js';
 import { isSafeName, safeJoin } from '../lib/safepath.js';
+import { guardIdParam } from '../lib/validate.js';
 
 const patchSchema = z
   .object({
@@ -18,6 +19,7 @@ const patchSchema = z
 
 export function piecesRouter(db: Db, dataDir: string): Router {
   const router = Router();
+  guardIdParam(router);
 
   router.patch('/:id', (req, res) => {
     const patch = patchSchema.parse(req.body);

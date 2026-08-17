@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import { CATEGORIES, type Category, type GarmentDetail } from '../api/types';
+import { countLabel, formatDate } from '../lib/format';
 import './GarmentDrawer.css';
 
 export function GarmentDrawer(props: {
@@ -15,6 +16,14 @@ export function GarmentDrawer(props: {
     api.getGarment(props.garmentId).then(setG, () => props.onClose());
   }, [props.garmentId]);
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') props.onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [props.onClose]);
+
   if (!g) return null;
 
   const save = async (patch: Parameters<typeof api.patchGarment>[1]) => {
@@ -28,10 +37,17 @@ export function GarmentDrawer(props: {
   };
 
   return (
-    <aside className="drawer">
+    <aside
+      className="drawer"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="drawer-title"
+    >
       <header>
-        <h2>{g.name}</h2>
-        <button onClick={props.onClose}>close</button>
+        <h2 id="drawer-title">{g.name}</h2>
+        <button aria-label="Close garment details" onClick={props.onClose}>
+          close
+        </button>
       </header>
 
       {g.coverUrl && <img className="drawer-cover" src={g.coverUrl} alt={g.name} />}
@@ -90,7 +106,7 @@ export function GarmentDrawer(props: {
         {saving && <span className="drawer-saving">saving…</span>}
       </div>
 
-      <h3>Seen in {g.pieces.length} photo{g.pieces.length === 1 ? '' : 's'}</h3>
+      <h3>Seen in {countLabel(g.pieces.length, 'photo')}</h3>
       <div className="drawer-pieces">
         {g.pieces.map((p) => (
           <img key={p.id} src={p.cropUrl} alt="" title={p.photo?.filename} />
@@ -103,7 +119,10 @@ export function GarmentDrawer(props: {
           <ul className="drawer-merges">
             {g.mergeHistory.map((m) => (
               <li key={m.id}>
-                {m.created_at} {m.undone_at ? '(undone)' : ''}
+                <span>
+                  {formatDate(m.created_at)}
+                  {m.undone_at ? ' (undone)' : ''}
+                </span>
                 {!m.undone_at && m.target_garment_id === g.id && (
                   <button
                     onClick={async () => {

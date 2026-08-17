@@ -10,25 +10,31 @@ import { listPhotos, getPhoto, deletePhoto } from '../repo/photos.js';
 import { piecesForPhoto, piecesForGarment } from '../repo/pieces.js';
 import { getGarment, updateGarment } from '../repo/garments.js';
 import { isSafeName, safeJoin } from '../lib/safepath.js';
+import { guardIdParam } from '../lib/validate.js';
 
 const EMBEDDING_DIM = 512;
 
-const metaSchema = z.object({
-  pieces: z
-    .array(
-      z.object({
-        category: z.enum(CATEGORIES as [string, ...string[]]),
-        bbox: z.tuple([
-          z.number().finite().min(0).max(10000),
-          z.number().finite().min(0).max(10000),
-          z.number().finite().min(0).max(10000),
-          z.number().finite().min(0).max(10000),
-        ]),
-        embedding: z.string().min(1), // base64 Float32Array(512)
-      })
-    )
-    .max(24),
-});
+const metaSchema = z
+  .object({
+    pieces: z
+      .array(
+        z
+          .object({
+            category: z.enum(CATEGORIES as [string, ...string[]]),
+            bbox: z.tuple([
+              z.number().finite().min(0).max(10000),
+              z.number().finite().min(0).max(10000),
+              z.number().finite().min(0).max(10000),
+              z.number().finite().min(0).max(10000),
+            ]),
+            // base64 Float32Array(512) ≈ 2732 chars; upper-bounded for safety
+            embedding: z.string().min(1).max(4096),
+          })
+          .strict()
+      )
+      .max(24),
+  })
+  .strict();
 
 function decodeEmbedding(b64: string): Float32Array {
   const buf = Buffer.from(b64, 'base64');
@@ -58,6 +64,7 @@ export function photosRouter(db: Db, dataDir: string): Router {
   });
 
   const router = Router();
+  guardIdParam(router);
 
   router.post(
     '/',

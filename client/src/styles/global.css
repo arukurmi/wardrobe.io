@@ -63,6 +63,10 @@ button:hover {
   border-color: var(--accent);
 }
 
+button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
 button.primary {
   background: var(--accent);
   border-color: var(--accent);
@@ -97,7 +101,68 @@ select:focus {
   border-color: var(--accent);
 }
 
+/* Visible keyboard focus everywhere interactive, without showing a ring
+ * on mouse clicks. :focus-visible only fires for keyboard/programmatic
+ * focus, so pointer users keep the clean look. */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+a:focus-visible {
+  border-radius: 4px;
+}
+
 ::selection {
   background: var(--accent);
   color: var(--accent-ink);
+}
+
+/* Inline error banner for failed data loads. */
+.error-banner {
+  border: 1px solid var(--danger);
+  background: rgba(224, 82, 82, 0.1);
+  color: var(--danger);
+  border-radius: var(--radius);
+  padding: 0.7rem 1rem;
+  font-size: 0.9rem;
+  margin: 1rem 0;
+}
+
+/* Muted "loading…" line. */
+.loading {
+  color: var(--ink-faint);
+  font-size: 0.9rem;
+  padding: 2rem 0;
+}
+
+/* Shared empty-state block: centered, generously padded, muted. */
+.empty {
+  text-align: center;
+  padding: 5rem 1rem;
+  color: var(--ink-dim);
+  max-width: 32rem;
+  margin-inline: auto;
+}
+
+.empty h2 {
+  color: var(--ink);
+  margin-bottom: 0.5rem;
+}
+
+.empty p {
+  margin: 0;
+}
+
+/* Respect users who ask for less motion: neutralize transitions,
+ * animations and scroll-driven movement app-wide. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
