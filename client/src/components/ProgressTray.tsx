@@ -35,7 +35,11 @@ export function ProgressTray(props: {
   const doneCount = props.items.length - visible.length;
 
   return (
-    <aside className={`tray${state === 'settled' ? ' settled' : ''}`}>
+    <aside
+      className={`tray${state === 'settled' ? ' settled' : ''}`}
+      aria-label="Upload progress"
+      aria-live="polite"
+    >
       <header>
         <strong>Uploads</strong>
         <span className="tray-count">

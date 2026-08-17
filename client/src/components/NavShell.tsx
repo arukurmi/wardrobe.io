@@ -15,12 +15,14 @@ export function NavShell(props: { children: ReactNode; onPickFiles: () => void }
     <div className="shell">
       <header className="shell-header">
         <div className="brand">
-          <span className="brand-mark">w</span>
+          <span className="brand-mark" aria-hidden="true">
+            w
+          </span>
           <span className="brand-name">
             wardrobe<span className="brand-dot">.io</span>
           </span>
         </div>
-        <nav className="tabs">
+        <nav className="tabs" aria-label="Primary">
           {TABS.map((t) => (
             <NavLink
               key={t.to}

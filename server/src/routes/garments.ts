@@ -12,6 +12,7 @@ import { piecesForGarment, getPiece } from '../repo/pieces.js';
 import { getPhoto } from '../repo/photos.js';
 import { mergeGarments, undoMerge, listMergeEventsFor } from '../services/merge.js';
 import { pieceDto } from './photos.js';
+import { guardIdParam } from '../lib/validate.js';
 
 const patchSchema = z
   .object({
@@ -51,6 +52,7 @@ function garmentDto(db: Db, g: GarmentRow, opts: { detail?: boolean } = {}) {
 
 export function garmentsRouter(db: Db): Router {
   const router = Router();
+  guardIdParam(router);
 
   router.get('/', (req, res) => {
     const { category, q } = req.query as { category?: string; q?: string };
@@ -72,7 +74,10 @@ export function garmentsRouter(db: Db): Router {
   });
 
   router.post('/:id/merge', (req, res) => {
-    const body = z.object({ into: z.string().min(1) }).parse(req.body);
+    const body = z
+      .object({ into: z.string().min(1).max(64) })
+      .strict()
+      .parse(req.body);
     const result = mergeGarments(db, req.params.id, body.into);
     res.json(result);
   });
@@ -82,6 +87,7 @@ export function garmentsRouter(db: Db): Router {
 
 export function mergesRouter(db: Db): Router {
   const router = Router();
+  guardIdParam(router);
   router.post('/:id/undo', (req, res) => {
     undoMerge(db, req.params.id);
     res.json({ ok: true });

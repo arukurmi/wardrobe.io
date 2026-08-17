@@ -59,11 +59,7 @@
   transition: opacity 0.15s;
 }
 
-.outfit:hover .outfit-delete {
+.outfit:hover .outfit-delete,
+.outfit-delete:focus-visible {
   opacity: 1;
-}
-
-.outfits-empty {
-  color: var(--ink-dim);
-  padding: 3rem 0;
 }

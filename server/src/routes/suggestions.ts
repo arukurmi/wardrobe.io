@@ -5,9 +5,11 @@ import { getPiece } from '../repo/pieces.js';
 import { getGarment } from '../repo/garments.js';
 import { acceptSuggestion } from '../services/merge.js';
 import { pieceDto } from './photos.js';
+import { guardIdParam } from '../lib/validate.js';
 
 export function suggestionsRouter(db: Db): Router {
   const router = Router();
+  guardIdParam(router);
 
   router.get('/', (_req, res) => {
     const out = listOpen(db)
